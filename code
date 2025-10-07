@@ -1,0 +1,39 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+
+# --- Параметры ---
+n = 100  # размер поля (n x n)
+steps = 70  # количество шагов
+p_seed = 0.05  # вероятность начального зарождения кластера
+
+# --- Инициализация поля ---
+grid = np.random.choice([0, 1], size=(n, n), p=[1 - p_seed, p_seed])
+
+
+# --- Правило роста ---
+def update(frame):
+    global grid
+    new_grid = grid.copy()
+
+    for i in range(n):
+        for j in range(n):
+            if grid[i, j] == 0:
+                # считаем количество соседей со значением 1
+                neighbors = grid[max(i - 1, 0):min(i + 2, n), max(j - 1, 0):min(j + 2, n)]
+                total = np.sum(neighbors) - grid[i, j]
+                # применяем правило
+                if total in [4, 5, 6, 7, 8, 9]:
+                    new_grid[i, j] = 1
+    grid = new_grid
+    im.set_array(grid)
+    return [im]
+
+
+fig, ax = plt.subplots()
+im = ax.imshow(grid, cmap='Greens', vmin=0, vmax=1)
+ax.set_title("Рост кластера (клеточный автомат)")
+ax.axis('off')
+
+ani = FuncAnimation(fig, update, frames=steps, interval=300, blit=True)
+plt.show()
